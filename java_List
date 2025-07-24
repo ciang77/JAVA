@@ -328,9 +328,17 @@ TreeMap 的查找效率是 O(logn)。并且保证了元素的顺序，因此适�
 ✅ O(n)：线性时间复杂度（Linear Time Complexity）
 当输入规模是 n 时，算法的执行时间（或操作次数）与 n 成正比。
 
+HashSet和TreeSet的区别
+HashSet、TreeSet中的元素都是不能重复的，并且它们都是线程不安全的，二者的区别是：
+HashSet中的元素可以是null，但TreeSet中的元素不能是null；
+HashSet不能保证元素的排列顺序，而TreeSet支持自然排序、定制排序两种排序的方式；
+HashSet底层是采用哈希表实现的，而TreeSet底层是采用红黑树实现的。
+
+
 24、讲讲 HashSet 的底层实现？
-HashSet 是由 HashMap 实现的，只不过值由一个固定的 Object 对象填充，而键用于操作。
-实际开发中，HashSet 并不常用，比如，如果我们需要按照顺序存储一组元素，那么 ArrayList 和 LinkedList 更适合；如果我们需要存储键值对并根据键进行查找，那么 HashMap 可能更适合。
+
+HashSet是基于HashMap实现的，默认构造函数是构建一个初始容量为16，负载因子为0.75 的HashMap。它封装了一个 HashMap 对象来存储所有的集合元素，所有放入 HashSet 中的集合元素实际上
+由 HashMap 的 key 来保存，而 HashMap 的 value 则存储了一个 PRESENT，它是一个静态的 Object 对象。
 HashSet 主要用于去重，比如，我们需要统计一篇文章中有多少个不重复的单词，就可以使用 HashSet 来实现。
 HashSet 会自动去重，因为它是用 HashMap 实现的，HashMap 的键是唯一的，相同键会覆盖掉原来的键，于是第二次 add 一个相同键的元素会直接覆盖掉第一次的键。
 
