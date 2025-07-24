@@ -45,15 +45,12 @@ Collection 继承了 Iterable 接口，这意味着所有实现 Collection 接�
 
 
 2.🌟ArrayList 和 LinkedList 有什么区别？
-ArrayList 是基于数组实现的，LinkedList 是基于链表实现的。
 
+ArrayList的实现是基于数组，LinkedList的实现是基于双向链表；
+对于随机访问ArrayList要优于LinkedList，ArrayList可以根据下标以O(1)时间复杂度对元素进行随机访问，而LinkedList的每一个元素都依靠地址指针和它后一个元素连接在一起，查找某个元素的时间复杂度是O(N)；
+对于插入和删除操作，LinkedList要优于ArrayList，因为当元素被添加到LinkedList任意位置的时候，不需要像ArrayList那样重新计算大小或者是更新索引；
+LinkedList比ArrayList更占内存，因为LinkedList的节点除了存储数据，还存储了两个引用，一个指向前一个元素，一个指向后一个元素。
 多数情况下，ArrayList 更利于查找，LinkedList 更利于增删。
-①、由于 ArrayList 是基于数组实现的，所以 get(int index) 可以直接通过数组下标获取，时间复杂度是 O(1)；LinkedList 是基于链表实现的，get(int index) 需要遍历链表，时间复杂度是 O(n)。
-当然，get(E element) 这种查找，两种集合都需要遍历通过 equals 比较获取元素，所以时间复杂度都是 O(n)。
-②、ArrayList 如果增删的是数组的尾部，时间复杂度是 O(1)；如果 add 的时候涉及到扩容，时间复杂度会上升到 O(n)。
-但如果插入的是中间的位置，就需要把插入位置后的元素向前或者向后移动，甚至还有可能触发扩容，效率就会低很多，变成 O(n)。
-LinkedList 因为是链表结构，插入和删除只需要改变前置节点、后置节点和插入节点的引用，因此不需要移动元素。
-如果是在链表的头部插入或者删除，时间复杂度是 O(1)；如果是在链表的中间插入或者删除，时间复杂度是 O(n)，因为需要遍历链表找到插入位置；如果是在链表的尾部插入或者删除，时间复杂度是 O(1)。
 
 ArrayList 和 LinkedList 是否支持随机访问？
 ①、ArrayList 是基于数组的，也实现了 RandomAccess 接口，所以它支持随机访问，可以通过下标直接获取元素。
@@ -77,6 +74,20 @@ LinkedList 适用于：
 数组在内存中占用的是一块连续的存储空间，因此我们可以通过数组下标快速访问任意元素。数组在创建时必须指定大小，一旦分配内存，数组的大小就固定了。
 链表的元素存储在于内存中的任意位置，每个节点通过指针指向下一个节点。
 
+有哪些线程安全的List？
+Vector
+Vector是比较古老的API，虽然保证了线程安全，但是由于效率低一般不建议使用。
+
+Collections.SynchronizedList
+SynchronizedList是Collections的内部类，Collections提供了synchronizedList方法，可以将一个线程不安全的List包装成线程安全的List，即SynchronizedList。
+它比Vector有更好的扩展性和兼容性，但是它所有的方法都带有同步锁，也不是性能最优的List。
+
+CopyOnWriteArrayList
+CopyOnWriteArrayList是Java 1.5在java.util.concurrent包下增加的类，它采用复制底层数组的方式来实现写操作。当线程对此类集合执行读取操作时，线程将会直接读取集合本身，
+无须加锁与阻塞。当线程对此类集合执行写入操作时，集合会在底层复制一份新的数组，接下来对新的数组执行写入操作。由于对集合的写入操作都是对数组的副本执行操作，因此它是线程安全的。
+在所有线程安全的List中，它是性能最优的方案。
+
+
 3.ArrayList 的扩容机制了解吗？
 了解。当往 ArrayList 中添加元素时，会先检查是否需要扩容，如果当前容量+1 超过数组长度，就会进行扩容。
 扩容后的新数组长度是原来的 1.5 倍，然后再把原数组的值拷贝到新数组中。
@@ -86,6 +97,10 @@ LinkedList 适用于：
 
 为什么 ArrayList 不直接序列化元素数组呢？
 出于效率的考虑，数组可能长度 100，但实际只用了 50，剩下的 50 没用到，也就不需要序列化。
+
+介绍一下ArrayList的数据结构？
+ArrayList的底层是用数组来实现的，默认第一次插入元素时创建大小为10的数组，超出限制时会增加50%的容量，并且数据以 System.arraycopy() 复制到新的数组，因此最好能给出数组大小的预估值。
+按数组下标访问元素的性能很高，这是数组的基本优势。直接在数组末尾加入元素的性能也高，但如果按下标插入、删除元素，则要用 System.arraycopy() 来移动部分受影响的元素，性能就变差了，这是基本劣势。
 
 5.快速失败fail-fast了解吗？
 fail—fast 是 Java 集合的一种错误检测机制。
