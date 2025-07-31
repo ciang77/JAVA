@@ -22,8 +22,12 @@ Spring Boot通过提供众多起步依赖（Starter）降低项目依赖的复�
 4、请描述Spring Boot自动装配的过程
 使用Spring Boot时，我们只需引入对应的Starters，Spring Boot启动时便会自动加载相关依赖，配置相应的初始化参数，以最快捷、简单的形式对第三方软件进行集成，这便是Spring Boot的自动配置功能。
 
-整个自动装配的过程是：Spring Boot通过@EnableAutoConfiguration注解开启自动配置，加载spring.factories中注册的各种AutoConfiguration类，当某个AutoConfiguration类满足其注解@Conditional指定的生效条件
-（Starters提供的依赖、配置或Spring容器中是否存在某个Bean等）时，实例化该AutoConfiguration类中定义的Bean（组件等），并注入Spring容器，就可以完成依赖框架的自动配置。
+整个自动装配的过程是：Spring Boot通过@EnableAutoConfiguration注解开启自动配置，
+Spring Boot 为了进一步简化，直接通过 @SpringBootApplication 注解一步搞定，该注解包含了 @EnableAutoConfiguration 注解。
+main 类启动的时候，Spring Boot 会通过底层的AutoConfigurationImportSelector 类加载自动装配类。
+AutoConfigurationImportSelector实现了ImportSelector接口，该接口的作用是收集需要导入的配置类，配合 @Import() 将相应的类导入到 Spring 容器中。
+获取注入类的方法是 selectImports()，它实际调用的是getAutoConfigurationEntry()，这个方法是获取自动装配类的关键。
+
 
 5、说说你对Spring Boot注解的了解
 
@@ -60,15 +64,44 @@ Spring Boot通过提供众多起步依赖（Starter）降低项目依赖的复�
 @ConditionalOnSingleCandidate：当指定的Bean在容器中只有一个或者有多个但是指定了首选的Bean时。
 @ConditionalOnWebApplication：在项目是一个Web项目的条件下。
 
+6、Spring Boot Starter 的原理了解吗？
+Spring Boot Starter 主要通过起步依赖和自动配置机制来简化项目的构建和配置过程。
+起步依赖是 Spring Boot 提供的一组预定义依赖项，它们将一组相关的库和模块打包在一起。比如 spring-boot-starter-web 就包含了 Spring MVC、Tomcat 和 Jackson 等依赖。
+自动配置机制是 Spring Boot 的核心特性，通过自动扫描类路径下的类、资源文件和配置文件，自动创建和配置应用程序所需的 Bean 和组件。
 
 
+7、Spring Boot 启动原理了解吗？
+Spring Boot 的启动由 SpringApplication 类负责：
 
+第一步，创建 SpringApplication 实例，负责应用的启动和初始化；
+第二步，从 application.yml 中加载配置文件和环境变量；
+第三步，创建上下文环境 ApplicationContext，并加载 Bean，完成依赖注入；
+第四步，启动内嵌的 Web 容器。
+第五步，发布启动完成事件 ApplicationReadyEvent，并调用 ApplicationRunner 的 run 方法完成启动后的逻辑。
 
+了解@SpringBootApplication 注解吗？
+@SpringBootApplication是 Spring Boot 的核心注解，经常用于主类上，作为项目启动入口的标识。它是一个组合注解：
 
+@SpringBootConfiguration：继承自 @Configuration，标注该类是一个配置类，相当于一个 Spring 配置文件。
+@EnableAutoConfiguration：告诉 Spring Boot 根据 pom.xml 中添加的依赖自动配置项目。例如，如果 spring-boot-starter-web 依赖被添加到项目中，Spring Boot 会自动配置 Tomcat 和 Spring MVC。
+@ComponentScan：扫描当前包及其子包下被@Component、@Service、@Controller、@Repository 注解标记的类，并注册为 Spring Bean。
 
+为什么 Spring Boot 在启动的时候能够找到 main 方法上的@SpringBootApplication 注解？
+Spring Boot 在启动时能够找到主类上的@SpringBootApplication注解，是因为它利用了 Java 的反射机制和类加载机制，结合 Spring 框架内部的一系列处理流程。
+当运行一个 Spring Boot 程序时，通常会调用主类中的main方法，这个方法会执行SpringApplication.run()
+SpringApplication.run(Class<?> primarySource, String... args)方法接收两个参数：第一个是主应用类（即包含main方法的类），
+第二个是命令行参数。primarySource参数提供了一个起点，Spring Boot 通过它来加载应用上下文。
+Spring Boot 利用 Java 反射机制来读取传递给run方法的类（MyApplication.class）。它会检查这个类上的注解，包括@SpringBootApplication。
 
+Spring Boot 默认的包扫描路径是什么？
+Spring Boot 的默认包扫描路径是以启动类 @SpringBootApplication 注解所在的包为根目录的，即默认情况下，Spring Boot 会扫描启动类所在包及其子包下的所有组件。
 
+8、SpringBoot 和 SpringMVC 的区别？
+Spring MVC 是基于 Spring 框架的一个模块，提供了一种 Model-View-Controller（模型-视图-控制器）的开发模式。
+Spring Boot 旨在简化 Spring 应用的配置和部署过程，提供了大量的自动配置选项，以及运行时环境的内嵌 Web 服务器，这样就可以更快速地开发一个 SpringMVC 的 Web 项目。
 
+9、Spring Boot 和 Spring 有什么区别？（补充）
+Spring Boot 是 Spring Framework 的一个扩展，提供了一套快速配置和开发的机制，可以帮助我们快速搭建 Spring 项目的骨架，提高生产效率。
 
 
 
