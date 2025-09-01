@@ -353,3 +353,36 @@ ArrayList 保持元素的插入顺序，可以通过索引访问元素；HashSet
 
 JDK1.8 的ConcurrentHashMap 实现已经摒弃了 Segment 的概念，而是直接用 Node 数组+链表+红黑树的数据结构来实现，并发控制使用 Synchronized 和 CAS 来操作，整个看起来就像是优化过且线程安全的 HashMap，
 虽然在 JDK1.8 中还能看到 Segment 的数据结构，但是已经简化了属性，只是为了兼容旧版本。
+
+25、hashmap，hashtable，ConcurrentHashMap区别
+HashMap 在多线程环境下 不安全，可能出现数据不一致甚至死循环（扩容时）。
+Hashtable 虽然线程安全，但采用的是 整表加锁（synchronized），并发性能差。
+ConcurrentHashMap 采用了更精细化的锁机制（JDK7 是 分段锁，JDK8 之后是 CAS + synchronized + Node 链表/红黑树），保证了线程安全
+
+ConcurrentHashMap应用于项目三，存储图表类型和渲染方式，优点如下
+高并发性能
+JDK7：使用 分段锁（Segment），多个线程可同时操作不同段，提高并发效率。
+JDK8：取消分段锁，使用 CAS（Compare-And-Swap）+ synchronized 锁定单个桶（bucket），避免了大范围锁竞争，效率更高。
+
+ConcurrentHashMap 允许 读操作无锁，读线程几乎不会阻塞（除非在扩容或修改时）。
+写操作通过 CAS + synchronized 进行保证，只锁定当前 bin（链表/红黑树），减少冲突。
+
+扩容时性能更好
+HashMap 扩容时是单线程操作，可能引发 死链 bug（JDK7 之前的并发 put）。
+ConcurrentHashMap 在扩容时，采用 多线程协作扩容，分区转移数据，提高扩容效率。
+
+更好的可伸缩性
+由于采用了局部加锁/无锁读，ConcurrentHashMap 在高并发环境下可支持大量线程安全访问，适合缓存、Map 存储、注册表等高并发场景。
+
+
+
+
+
+
+
+
+
+
+
+
+
