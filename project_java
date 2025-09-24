@@ -98,3 +98,30 @@ OK，那你清楚 threadlocal 出现内存泄漏的真实原因是什么吗？
 一、没有手动删除Entry对象，使用完threadlocal调用其remove方法就可以删除对应的Entry，避免内存泄漏；
 
 
+
+项目怎么部署到阿里云服务器
+我在项目里是通过 Docker 容器化部署到阿里云服务器的，主要流程如下：
+
+构建镜像
+对 Spring Boot 服务，我写了一个 Dockerfile，基于 openjdk:8 镜像，把打好的 jar 包复制进去，设置启动命令。
+对 Python 模型推理服务，我写了另一个 Dockerfile，基于 python:3.9 镜像，在里面安装 PyTorch、pandas 等依赖库，并指定启动脚本。
+python:3.9、openjdk:8 本质上是 基础镜像，就像一个已经装好 Python 或 JDK 的最小化操作系统环境。你在写 Dockerfile 时，会用 FROM python:3.9 或 FROM openjdk:8 作为起点，在上面继续安装依赖、拷贝项目文件。
+
+推送到镜像仓库
+本地构建好镜像后，我会把它们推送到阿里云的 ACR（容器镜像服务）仓库，这样服务器只需要拉取镜像就能运行，不必每次都重新构建。
+
+在服务器运行容器
+登录阿里云服务器后，通过 docker pull 拉取镜像，再用 docker run 或者 docker-compose up -d 启动容器。
+我用 Docker Compose 来统一管理后端服务、Python 模型服务、MySQL、Redis、TimescaleDB 和 Nginx，这样整个系统可以通过一条命令启动和关闭。
+其实 Docker Compose 就是用一个配置文件（docker-compose.yml）来定义多容器应用
+在 Compose 中，每个服务都有一个名字（比如 backend, mlservice, mysql）。
+不同容器之间调用时，直接用 服务名当主机名。
+
+外部访问配置
+Nginx 容器对外只暴露 80/443 端口，负责反向代理，把请求转发到后端服务容器，同时可以配置 HTTPS 证书。
+如果需要扩展高并发，我可以在 Compose 里开多个后端实例，让 Nginx 做负载均衡。
+
+运维与升级
+日志会统一挂载到宿主机目录，方便排查问题。
+如果要升级服务，只需重新构建镜像并推送，然后在服务器 docker-compose pull && docker-compose up -d 就能完成平滑升级。
+
